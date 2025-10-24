@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const patientController = require('../controllers/patients.controller');
+const ctrl = require('../controllers/patients.controller');
+
 
 module.exports = router;
 
