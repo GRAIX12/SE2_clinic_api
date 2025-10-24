@@ -4,9 +4,9 @@ const ctrl = require('../controllers/doctors.controller.js');
 
 module.exports = router;
 
-router.get('/', doctors.controller.getAllDoctors);
-router.get('/:id', doctors.controller.getDoctorById);
-router.post('/', doctors.controller.createDoctor);
-router.put('/:id', doctors.controller.updateDoctor);
-router.delete('/:id', doctors.controller.deleteDoctor);
+router.get('/', ctrl.getAllDoctors);
+router.get('/:id', ctrl.getDoctorById);
+router.post('/', ctrl.createDoctor);
+router.put('/:id', ctrl.updateDoctor);
+router.delete('/:id', ctrl.deleteDoctor);
 

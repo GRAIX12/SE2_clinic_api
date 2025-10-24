@@ -4,8 +4,8 @@ const patientController = require('../controllers/patients.controller');
 
 module.exports = router;
 
-router.get('/', patients.controller.getAllPatients);
-router.get('/:id', patients.controller.getPatientById);
-router.post('/', patients.controller.createPatient);
-router.put('/:id', patients.controller.updatePatient);
-router.delete('/:id', patients.controller.deletePatient);
+router.get('/', ctrl.getAllPatients);
+router.get('/:id', ctrl.getPatientById);
+router.post('/', ctrl.createPatient);
+router.put('/:id', ctrl.updatePatient);
+router.delete('/:id', ctrl.deletePatient);
