@@ -1,49 +1,55 @@
-const Patient = require('../models/Patient.js');
+const Patient = require('../models/Patient');
 
-exports.list = async (req, res, next) => {
+// GET all patients
+exports.getAllPatients = async (req, res) => {
   try {
-    const patients = await Patient.find().sort({ createdAt: -1 });
+    const patients = await Patient.find();
     res.json(patients);
-  } catch (err) { next(err); }
-};
-
-exports.create = async (req, res, next) => {
-  try {
-    const p = await Patient.create(req.body);
-    res.status(201).json(p);
   } catch (err) {
-    if (err.code === 11000 && err.keyPattern && err.keyPattern.email) {
-      return res.status(409).json({ error: 'Email already exists' });
-    }
-    next(err);
+    res.status(500).json({ message: err.message });
   }
 };
 
-exports.get = async (req, res, next) => {
+// GET patient by ID
+exports.getPatientById = async (req, res) => {
   try {
-    const p = await Patient.findById(req.params.id);
-    if (!p) return res.status(404).json({ error: 'Patient not found' });
-    res.json(p);
-  } catch (err) { next(err); }
-};
-
-exports.update = async (req, res, next) => {
-  try {
-    const p = await Patient.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!p) return res.status(404).json({ error: 'Patient not found' });
-    res.json(p);
+    const patient = await Patient.findById(req.params.id);
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+    res.json(patient);
   } catch (err) {
-    if (err.code === 11000 && err.keyPattern && err.keyPattern.email) {
-      return res.status(409).json({ error: 'Email already exists' });
-    }
-    next(err);
+    res.status(400).json({ message: err.message });
   }
 };
 
-exports.remove = async (req, res, next) => {
+// CREATE patient
+exports.createPatient = async (req, res) => {
   try {
-    const p = await Patient.findByIdAndDelete(req.params.id);
-    if (!p) return res.status(404).json({ error: 'Patient not found' });
-    res.json({ ok: true });
-  } catch (err) { next(err); }
+    const patient = new Patient(req.body);
+    await patient.save();
+    res.status(201).json(patient);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+//UPDATE patient
+exports.updatePatient = async (req, res) => {
+  try {
+    const patient = await Patient.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+    res.json(patient);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+//DELETE patient
+exports.deletePatient = async (req, res) => {
+  try {
+    const patient = await Patient.findByIdAndDelete(req.params.id);
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+    res.json({ message: 'Patient deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };

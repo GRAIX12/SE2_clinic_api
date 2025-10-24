@@ -1,71 +1,59 @@
-const Appointment = require('../models/Appointment.js');
-const Patient = require('../models/Patient.js');
-const Doctor = require('../models/Doctor.js');
+const Appointment = require('../models/Appointment');
 
-exports.list = async (req, res, next) => {
+// GET all appointments
+exports.getAllAppointments = async (req, res) => {
   try {
-    const list = await Appointment.find()
-      .populate('patientId', 'name email')
-      .populate('doctorId', 'name specialty')
-      .sort({ startAt: 1 });
-    res.json(list);
-  } catch (err) { next(err); }
+    const appointments = await Appointment.find()
+      .populate('patientId')
+      .populate('doctorId');
+    res.json(appointments);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
-exports.create = async (req, res, next) => {
+// GET appointment by ID
+exports.getAppointmentById = async (req, res) => {
   try {
-    const { patientId, doctorId, startAt, endAt, notes } = req.body;
-    if (!patientId || !doctorId || !startAt || !endAt) {
-      return res.status(400).json({ error: 'patientId, doctorId, startAt and endAt are required' });
-    }
-
-    const [patient, doctor] = await Promise.all([
-      Patient.findById(patientId),
-      Doctor.findById(doctorId)
-    ]);
-    if (!patient) return res.status(400).json({ error: 'Invalid patientId' });
-    if (!doctor) return res.status(400).json({ error: 'Invalid doctorId' });
-
-    const a = await Appointment.create({ patientId, doctorId, startAt, endAt, notes });
-    const populated = await a.populate('patientId', 'name email').populate('doctorId', 'name specialty');
-    res.status(201).json(populated);
-  } catch (err) { next(err); }
+    const appointment = await Appointment.findById(req.params.id)
+      .populate('patientId')
+      .populate('doctorId');
+    if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
+    res.json(appointment);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 };
 
-exports.get = async (req, res, next) => {
+// CREATE apppointment
+exports.createAppointment = async (req, res) => {
   try {
-    const a = await Appointment.findById(req.params.id)
-      .populate('patientId', 'name email')
-      .populate('doctorId', 'name specialty');
-    if (!a) return res.status(404).json({ error: 'Appointment not found' });
-    res.json(a);
-  } catch (err) { next(err); }
+    const appointment = new Appointment(req.body);
+    await appointment.save();
+    res.status(201).json(appointment);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 };
 
-exports.update = async (req, res, next) => {
+// UPDATE appointment
+exports.updateAppointment = async (req, res) => {
   try {
-    if (req.body.patientId) {
-      const p = await Patient.findById(req.body.patientId);
-      if (!p) return res.status(400).json({ error: 'Invalid patientId' });
-    }
-    if (req.body.doctorId) {
-      const d = await Doctor.findById(req.body.doctorId);
-      if (!d) return res.status(400).json({ error: 'Invalid doctorId' });
-    }
-
-    const a = await Appointment.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
-      .populate('patientId', 'name email')
-      .populate('doctorId', 'name specialty');
-
-    if (!a) return res.status(404).json({ error: 'Appointment not found' });
-    res.json(a);
-  } catch (err) { next(err); }
+    const appointment = await Appointment.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
+    res.json(appointment);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 };
 
-exports.remove = async (req, res, next) => {
+// DELETE appointment
+exports.deleteAppointment = async (req, res) => {
   try {
-    const a = await Appointment.findByIdAndDelete(req.params.id);
-    if (!a) return res.status(404).json({ error: 'Appointment not found' });
-    res.json({ ok: true });
-  } catch (err) { next(err); }
+    const appointment = await Appointment.findByIdAndDelete(req.params.id);
+    if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
+    res.json({ message: 'Appointment deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
